@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "goit-pythonweb-hw-12"
+version = "0.1.0"
+description = "Fullstack Web Development with Python - Homework 12"
+authors = ["Mykola Podopryhora <m.podopryhora@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "^0.115.5"}
+sqlalchemy = "^2.0.36"
+psycopg2-binary = "^2.9.10"
+asyncpg = "^0.30.0"
+alembic = "^1.14.0"
+python-jose = "^3.3.0"
+passlib = "^1.7.4"
+libgravatar = "^1.0.4"
+bcrypt = "^4.2.1"
+python-dotenv = "^1.0.1"
+pydantic-settings = "^2.6.1"
+slowapi = "^0.1.9"
+cloudinary = "^1.41.0"
+pytest = "^8.3.4"
+pytest-asyncio = "^0.25.0"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
