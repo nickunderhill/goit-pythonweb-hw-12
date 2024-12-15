@@ -26,6 +26,21 @@ async def read_contacts(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """
+    Get all contacts for the current user with optional filters.
+
+    Args:
+        skip (int): The number of contacts to skip. Default is 0.
+        limit (int): The maximum number of contacts to return. Default is 10.
+        name (str): Optional filter by name.
+        surname (str): Optional filter by surname.
+        email (str): Optional filter by email.
+        db (AsyncSession): The database session.
+        user (User): The current authenticated user.
+
+    Returns:
+        List[ContactResponse]: A list of contacts.
+    """
     contact_service = ContactService(db)
     contacts = await contact_service.get_contacts(
         skip, limit, user, name, surname, email
@@ -40,6 +55,20 @@ async def read_contact(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """
+    Get a contact by ID.
+
+    Args:
+        contact_id (int): The ID of the contact to retrieve.
+        db (AsyncSession): The database session.
+        user (User): The current authenticated user.
+
+    Returns:
+        ContactResponse: The retrieved contact.
+
+    Raises:
+        HTTPException: If the contact is not found.
+    """
     contact_service = ContactService(db)
     contact = await contact_service.get_contact(contact_id, user)
     if contact is None:
@@ -55,6 +84,17 @@ async def create_contact(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """
+    Create a new contact.
+
+    Args:
+        contact_data (ContactCreate): The contact data for creation.
+        db (AsyncSession): The database session.
+        user (User): The current authenticated user.
+
+    Returns:
+        ContactResponse: The created contact.
+    """
     contact_service = ContactService(db)
     return await contact_service.create_contact(body, user)
 
@@ -66,6 +106,21 @@ async def update_contact(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """
+    Update a contact.
+
+    Args:
+        contact_id (int): The ID of the contact to update.
+        body (ContactUpdate): The updated contact data.
+        db (AsyncSession): The database session.
+        user (User): The current authenticated user.
+
+    Returns:
+        ContactResponse: The updated contact.
+
+    Raises:
+        HTTPException: If the contact is not found.
+    """
     contact_service = ContactService(db)
     contact = await contact_service.update_contact(contact_id, body, user)
     if contact is None:
@@ -81,6 +136,20 @@ async def remove_contact(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """
+    Remove a contact.
+
+    Args:
+        contact_id (int): The ID of the contact to remove.
+        db (AsyncSession): The database session.
+        user (User): The current authenticated user.
+
+    Returns:
+        ContactResponse: The removed contact.
+
+    Raises:
+        HTTPException: If the contact is not found.
+    """
     contact_service = ContactService(db)
     contact = await contact_service.remove_contact(contact_id, user)
     if contact is None:
@@ -90,15 +159,23 @@ async def remove_contact(
     return contact
 
 
-router.get("/birthdays-next-week", response_model=List[ContactResponse])
-
-
 @router.get("/birthdays/upcoming", response_model=List[ContactResponse])
 async def get_upcoming_birthdays(
     days: int = Query(7),
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    """
+    Get contacts with upcoming birthdays within a specified number of days.
+
+    Args:
+        days (int): The number of days to look ahead for upcoming birthdays. Default is 7.
+        db (AsyncSession): The database session.
+        user (User): The current authenticated user.
+
+    Returns:
+        List[ContactResponse]: A list of contacts with upcoming birthdays.
+    """
     contact_service = ContactService(db)
     contacts = await contact_service.get_upcoming_birthdays(user, days)
     return contacts

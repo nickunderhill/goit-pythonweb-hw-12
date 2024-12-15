@@ -16,9 +16,28 @@ class Hash:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     def verify_password(self, plain_password, hashed_password):
+        """
+        Verify a plain password against a hashed password.
+
+        Args:
+            plain_password (str): The plain password to verify.
+            hashed_password (str): The hashed password to verify against.
+
+        Returns:
+            bool: True if the password matches, False otherwise.
+        """
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def get_password_hash(self, password: str):
+        """
+        Hash a plain password.
+
+        Args:
+            password (str): The plain password to hash.
+
+        Returns:
+            str: The hashed password.
+        """
         return self.pwd_context.hash(password)
 
 
@@ -26,6 +45,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 async def create_access_token(data: dict, expires_delta: Optional[int] = None):
+    """
+    Create a JWT access token.
+
+    Args:
+        data (dict): The data to encode in the token.
+        expires_delta (Optional[int]): The expiration time in minutes. Default is None.
+
+    Returns:
+        str: The encoded JWT access token.
+    """
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(UTC) + timedelta(seconds=expires_delta)
@@ -43,6 +72,19 @@ async def create_access_token(data: dict, expires_delta: Optional[int] = None):
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
 ):
+    """
+    Get the current authenticated user from the JWT token.
+
+    Args:
+        token (str): The JWT token.
+        db (AsyncSession): The database session.
+
+    Returns:
+        UserService: The current authenticated user.
+
+    Raises:
+        HTTPException: If the token is invalid or the user is not found.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

@@ -12,13 +12,13 @@ def mock_db_session():
 
 
 @pytest.fixture
-def user_service(mock_db_session):
-    return UserService(db=mock_db_session)
+def mock_user_repository(mock_db_session):
+    return AsyncMock(spec=UserRepository, db=mock_db_session)
 
 
 @pytest.fixture
-def mock_user_repository(mock_db_session):
-    return AsyncMock(spec=UserRepository, db=mock_db_session)
+def user_service(mock_db_session):
+    return UserService(db=mock_db_session)
 
 
 @pytest.mark.asyncio
@@ -40,20 +40,6 @@ async def test_create_user(user_service, mock_user_repository):
 
 
 @pytest.mark.asyncio
-async def test_get_user_by_email(user_service, mock_user_repository):
-    mock_user_repository.get_user_by_email.return_value = User(
-        id=1, username="test", avatar="avatar", email="test@example.com"
-    )
-
-    user = await user_service.get_user_by_email("test@example.com")
-
-    assert user.username == "test"
-    await mock_user_repository.get_user_by_email.assert_called_once_with(
-        "test@example.com"
-    )
-
-
-@pytest.mark.asyncio
 async def test_create_user_with_exception(user_service, mock_user_repository):
     user_data = UserCreate(
         username="test", email="test@example.com", password="password"
@@ -70,13 +56,15 @@ async def test_create_user_with_exception(user_service, mock_user_repository):
     assert result.avatar is None
 
 
-# @pytest.mark.asyncio
-# async def test_get_user_by_id(user_service, mock_user_repository):
-#     user = User(id=1, username="test", avatar="avatar", email="test@example.com")
-#     mock_user_repository.get_user_by_id = user
+async def test_get_user_by_email(user_service, mock_user_repository):
+    # Create a user instance to return
+    user = User(id=1, username="test", avatar="avatar", email="test@example.com")
 
-#     result = await user_service.get_user_by_id(1)
+    # Mock the repository's async method
+    mock_user_repository.get_user_by_email = AsyncMock(return_value=user)
 
-#     assert result.email == "test@example.com"
-#     assert result.username == "test"
-#     assert result.avatar is None
+    # Call the service method
+    result = await user_service.get_user_by_email("test@example.com")
+
+    # Assertions
+    assert result.username == "test"

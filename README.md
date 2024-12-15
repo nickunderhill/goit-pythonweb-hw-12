@@ -20,6 +20,7 @@
 - Slowapi
 - Cloudinary
 - pytest
+- Sphinx
 
 ## Технічнe завдання
 
@@ -60,6 +61,8 @@ docker-compose up --build
 
 Swagger: http://localhost:8000/docs
 
+![swagger](images/swagger.png)
+
 ### Тести
 
 Для запуску тестів використовуйте команду:
@@ -68,4 +71,22 @@ Swagger: http://localhost:8000/docs
 poetry run pytest
 ```
 
-![swagger](images/swagger.png)
+### Документація
+
+Щоб згенерувати документацію за допомогою Sphinx
+
+1. Виконайте команду Windows:
+
+```
+.\\make.bat html
+```
+
+Linux:
+
+```
+make html
+```
+
+2. Відкрийте в браузері `docs/_build/html/index.html`
+
+![sphinx](images/sphinx.png)
