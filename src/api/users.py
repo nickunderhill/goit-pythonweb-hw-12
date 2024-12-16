@@ -30,33 +30,10 @@ async def me(request: Request, user: User = Depends(get_current_user)):
     return user
 
 
-@router.get("/{user_id}", response_model=User)
-async def get_user_by_id(
-    user_id: int,
-    db: AsyncSession = Depends(get_db),
-    user: User = Depends(get_current_admin_user),
-):
-    """
-    Get a user by their ID.
-
-    Args:
-        user_id (int): The ID of the user to retrieve.
-        db (AsyncSession): The database session.
-        user (User): The current authenticated user.
-
-    Returns:
-        User: The retrieved user.
-
-    Only admin users can get other users by ID.
-    """
-    user_service = UserService(db)
-    return await user_service.get_user_by_id(user_id)
-
-
 @router.patch("/avatar", response_model=User)
 async def update_avatar_user(
     file: UploadFile = File(),
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_admin_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
