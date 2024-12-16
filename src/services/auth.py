@@ -10,6 +10,7 @@ from jose import JWTError, jwt
 from src.database.db import get_db
 from src.conf.config import settings
 from src.services.users import UserService
+from src.database.models import User, UserRole
 
 
 class Hash:
@@ -106,3 +107,11 @@ async def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_admin_user(current_user: User = Depends(get_current_user)):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=403, detail="You do not have permission to access this resource"
+        )
+    return current_user

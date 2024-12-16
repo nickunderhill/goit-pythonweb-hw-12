@@ -6,7 +6,7 @@ from src.database.db import get_db
 
 from src.schemas import User
 from src.conf.config import settings
-from src.services.auth import get_current_user
+from src.services.auth import get_current_user, get_current_admin_user
 from src.services.users import UserService
 from src.services.upload_file import UploadFileService
 
@@ -28,6 +28,29 @@ async def me(request: Request, user: User = Depends(get_current_user)):
         User: The current authenticated user.
     """
     return user
+
+
+@router.get("/{user_id}", response_model=User)
+async def get_user_by_id(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_admin_user),
+):
+    """
+    Get a user by their ID.
+
+    Args:
+        user_id (int): The ID of the user to retrieve.
+        db (AsyncSession): The database session.
+        user (User): The current authenticated user.
+
+    Returns:
+        User: The retrieved user.
+
+    Only admin users can get other users by ID.
+    """
+    user_service = UserService(db)
+    return await user_service.get_user_by_id(user_id)
 
 
 @router.patch("/avatar", response_model=User)

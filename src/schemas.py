@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
+from src.database.models import UserRole
 
 
 class ContactBase(BaseModel):
@@ -35,6 +36,7 @@ class User(BaseModel):
     username: str
     email: str
     avatar: str
+    role: UserRole
 
     model_config = ConfigDict(from_attributes=True)
 
