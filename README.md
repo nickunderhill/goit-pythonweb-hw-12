@@ -21,6 +21,7 @@
 - Cloudinary
 - pytest
 - Sphinx
+- Redis
 
 ## Технічнe завдання
 

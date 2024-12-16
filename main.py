@@ -1,14 +1,26 @@
+from contextlib import asynccontextmanager
 from slowapi.errors import RateLimitExceeded
 from fastapi import FastAPI, Request
 from starlette.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from src.redis import init_redis, close_redis
 
 from src.api import utils, contacts, auth, users
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.redis_url = "redis://redis:6379"
+    await init_redis(app)
+    yield
+    await close_redis()
+
+
 app = FastAPI(
     title="Contacts API",
-    description="goit-pythonweb-hw-10",
-    version="1.0.0",
+    description="goit-pythonweb-hw-12",
+    version="1.0.1",
+    lifespan=lifespan,
 )
 
 origins = ["*"]

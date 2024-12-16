@@ -1,3 +1,4 @@
+import json
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Query, status
@@ -12,6 +13,10 @@ from src.schemas import (
 )
 from src.services.contacts import ContactService
 from src.services.auth import get_current_user
+from src.redis import get_redis
+from fastapi.encoders import jsonable_encoder
+
+CACHE_TTL_SEC = 3600
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
@@ -54,6 +59,7 @@ async def read_contact(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
+    redis=Depends(get_redis),
 ):
     """
     Get a contact by ID.
@@ -69,12 +75,20 @@ async def read_contact(
     Raises:
         HTTPException: If the contact is not found.
     """
+    cache_key = f"contact:{contact_id}"
+    cached_contact = await redis.get(cache_key)
+    if cached_contact:
+        print(f"Cache hit for {cache_key}")
+        return ContactResponse.model_validate_json(cached_contact)
+
     contact_service = ContactService(db)
     contact = await contact_service.get_contact(contact_id, user)
     if contact is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
         )
+
+    await redis.set(cache_key, json.dumps(jsonable_encoder(contact)), ex=CACHE_TTL_SEC)
     return contact
 
 
@@ -83,6 +97,7 @@ async def create_contact(
     body: ContactCreate,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
+    redis=Depends(get_redis),
 ):
     """
     Create a new contact.
@@ -96,7 +111,10 @@ async def create_contact(
         ContactResponse: The created contact.
     """
     contact_service = ContactService(db)
-    return await contact_service.create_contact(body, user)
+    contact = await contact_service.create_contact(body, user)
+    cache_key = f"contact:{contact.id}"
+    await redis.set(cache_key, json.dumps(jsonable_encoder(contact)), ex=CACHE_TTL_SEC)
+    return contact
 
 
 @router.put("/{contact_id}", response_model=ContactResponse)
@@ -105,6 +123,7 @@ async def update_contact(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
+    redis=Depends(get_redis),
 ):
     """
     Update a contact.
@@ -127,6 +146,8 @@ async def update_contact(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
         )
+    cache_key = f"contact:{contact_id}"
+    await redis.set(cache_key, json.dumps(jsonable_encoder(contact)), ex=CACHE_TTL_SEC)
     return contact
 
 
@@ -135,6 +156,7 @@ async def remove_contact(
     contact_id: int,
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
+    redis=Depends(get_redis),
 ):
     """
     Remove a contact.
@@ -156,6 +178,8 @@ async def remove_contact(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
         )
+    cache_key = f"contact:{contact_id}"
+    await redis.delete(cache_key)
     return contact
 
 

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database.models import Contact
 from src.schemas import ContactUpdate, ContactCreate, User
+from src.redis import get_redis
 
 
 class ContactRepository:
