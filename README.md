@@ -72,6 +72,14 @@ Swagger: http://localhost:8000/docs
 poetry run pytest
 ```
 
+Покриття (test coverage)
+
+```
+pytest --cov=src tests
+```
+
+![coverage](images/coverage.png)
+
 ### Документація
 
 Щоб згенерувати документацію за допомогою Sphinx
@@ -89,5 +97,3 @@ make html
 ```
 
 2. Відкрийте в браузері `docs/_build/html/index.html`
-
-![sphinx](images/sphinx.png)
